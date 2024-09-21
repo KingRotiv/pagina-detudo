@@ -1,12 +1,13 @@
 from io import BytesIO
 
 import streamlit as st
+from loguru import logger
 from PIL import Image
 
 
 # Informação da página
 st.header("Converter imagem")
-st.write("Converta imagens com rapidez e qualidade.")
+st.write("Converta imagem com rapidez e qualidade.")
 
 
 def converter_imagem() -> None:
@@ -17,8 +18,7 @@ def converter_imagem() -> None:
         )
         return None
     try:
-        imagem_bytes = BytesIO(imagem.read())
-        with Image.open(imagem_bytes) as i:
+        with Image.open(imagem) as i:
             # Se a imagem tiver um canal alfa, converta para RGB antes de salvar em JPEG
             if converter_para == "jpeg" and i.mode == "RGBA":
                 i = i.convert("RGB")
@@ -37,7 +37,8 @@ def converter_imagem() -> None:
                 key="converter_imagem.botao_baixar_nova_imagem",
             )
             st.toast(f"Imagem convertida para {converter_para}.", icon="✅")
-    except Exception:
+    except Exception as ex:
+        logger.error(ex)
         st.toast(
             "Ocorreu um erro ao converter a imagem. Tente novamente.",
             icon="❌",
@@ -48,6 +49,8 @@ opcoes_conversao = ["jpeg", "png", "bmp", "webp"]
 
 # Página
 imagem = st.file_uploader("Escolha uma imagem", type=opcoes_conversao)
+if imagem:
+    st.image(imagem, use_column_width=True)
 converter_para = st.selectbox(
     "Converter para", options=opcoes_conversao, disabled=not imagem
 )
