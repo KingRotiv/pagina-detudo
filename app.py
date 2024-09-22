@@ -11,6 +11,9 @@ inspecionar_imagem = st.Page("pages/inspecionar_imagem.py", title="Inspecionar i
 # Páginas de áudio
 converter_audio = st.Page("pages/converter_audio.py", title="Converter áudio", icon="🎵")
 
+# Páginas de vídeo
+converter_video = st.Page("pages/converter_video.py", title="Converter video", icon="🎥")
+
 # Página de curriculo
 gerar_curriculo = st.Page("pages/gerar_curriculo.py", title="Gerar Currículo", icon="📄")
 
@@ -21,6 +24,7 @@ pg = st.navigation({
         inspecionar_imagem
     ],
     "Áudio": [converter_audio],
+    "Vídeo": [converter_video],
     "Currículo": [gerar_curriculo],
 })
 pg.run()
