@@ -158,13 +158,16 @@ def adicionar_formacao(
     ano_termino=None,
     situacao="Cursando",
 ):
+    niveis_formacao = ["Educação Básica", "Ensino Profissionalizante", "Ensino Técnico", "Ensino Superior"]
+    situacoes_formacao = ["Cursando", "Concluído", "Trancado", "Incompleto"]
+
     with st.form("gerar_curriculo.form_formacao"):
         instituicao_formacao = st.text_input("Instituição", value=instituicao)
         curso_formacao = st.text_input("Curso", value=curso, help="Ex: Ensino Médio, Ciência da Computação e etc...")
         nivel_formacao = st.selectbox(
             "Nível",
-            ["Educação Básica", "Ensino Tecnico", "Ensino Superior"],
-            index=["Educação Básica", "Ensino Tecnico", "Ensino Superior"].index(nivel),
+            options=niveis_formacao,
+            index=niveis_formacao.index(nivel),
         )
         ano_inicio_formacao = st.number_input(
             "Ano de início", min_value=1900, step=1, value=ano_inicio
@@ -174,8 +177,8 @@ def adicionar_formacao(
         )
         situacao_formacao = st.selectbox(
             "Situação",
-            ["Cursando", "Concluído", "Trancado"],
-            index=["Cursando", "Concluído", "Trancado"].index(situacao),
+            options=situacoes_formacao,
+            index=situacoes_formacao.index(situacao),
         )
         salvar_formacao = st.form_submit_button("Salvar")
 
