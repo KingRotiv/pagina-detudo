@@ -18,6 +18,9 @@ def converter_audio() -> None:
         )
         return None
     try:
+        botao_converter.status("Convertendo áudio...")
+        botao_baixar_novo_audio.empty()
+
         audio_segment = AudioSegment.from_file(audio)
         novo_audio_bytes = BytesIO()
         audio_segment.export(novo_audio_bytes, format=converter_para)
@@ -25,14 +28,15 @@ def converter_audio() -> None:
 
         novo_nome = f"{audio.name.rsplit('.', 1)[0]}.{converter_para}"
         novo_formato = f"audio/{converter_para}"
-        placeholder_botao_baixar_novo_audio.download_button(
-            f"Baixar áudio {converter_para}",
-            data=novo_audio_bytes.getvalue(),
-            file_name=novo_nome,
-            mime=novo_formato,
-            key="converter_audio.botao_baixar_novo_audio",
+        st.session_state["converter_audio.botao_baixar_novo_audio"] = (
+            lambda: st.download_button(
+                f"Baixar áudio {converter_para}",
+                data=novo_audio_bytes.getvalue(),
+                file_name=novo_nome,
+                mime=novo_formato,
+            )
         )
-        st.toast(f"Aúdio convertio para {converter_para}.", icon="✅")
+        st.toast(f"Aúdio convertido para {converter_para}.", icon="✅")
     except Exception as ex:
         logger.error(ex)
         st.toast(
@@ -53,14 +57,17 @@ opcoes_conversao = [
 
 
 # Página
-audio = st.file_uploader("Escolha um áudo", type=opcoes_conversao)
+audio = st.file_uploader("Escolha um áudio", type=opcoes_conversao)
 if audio:
     st.audio(audio, format=audio.type)
 converter_para = st.selectbox(
     "Converter para", options=opcoes_conversao, disabled=not audio
 )
-botao_converter = st.button(
-    "Converter áudio", on_click=converter_audio, disabled=not audio
-)
-if st.session_state.get("converter_audio.botao_baixar_novo_audio") is None:
-    placeholder_botao_baixar_novo_audio = st.empty()
+botao_converter = st.empty()
+botao_converter.button("Converter áudio", on_click=converter_audio, disabled=not audio)
+botao_baixar_novo_audio = st.empty()
+if _botao_baixar_novo_audio := st.session_state.get(
+    "converter_audio.botao_baixar_novo_audio"
+):
+    with botao_baixar_novo_audio.container():
+        _botao_baixar_novo_audio()

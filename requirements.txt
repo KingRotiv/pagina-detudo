@@ -1,5 +1,6 @@
 exifread==3.0.0
 loguru==0.7.2
+moviepy==1.0.3
 pydub==0.25.1
 streamlit==1.38.0
 streamlit-tags==1.2.8

@@ -34,22 +34,23 @@ habilidades = (
 
 
 # Aba de Dados Básicos
-with st.expander("Informações Básicas", expanded=True):
+with st.expander("Informações Básicas (Obrigatório)", expanded=True):
     with st.form("form_dados_basicos", border=False):
-        nome_completo = st.text_input("Nome Completo")
+        nome_completo = st.text_input("Nome Completo", value=dados_basicos.get("Nome Completo"))
         data_nascimento = st.date_input(
             "Data de Nascimento",
+            value=dados_basicos.get("Data de Nascimento"),
             min_value=datetime.date(1900, 1, 1),
             max_value=datetime.date.today(),
             format="DD/MM/YYYY",
         )
-        celular = st.text_input("Celular")
-        email = st.text_input("Email")
-        cargo_desejado = st.text_input("Cargo Desejado")
+        celular = st.text_input("Celular", value=dados_basicos.get("Celular"))
+        email = st.text_input("Email", value=dados_basicos.get("Email"))
+        cargo_desejado = st.text_input("Cargo Desejado", value=dados_basicos.get("Cargo Desejado"), help="Ex: Analista de Sistemas ou Á Disposição da Empresa")
         salvar_dados_basicos = st.form_submit_button("Salvar")
 
         if salvar_dados_basicos:
-            if not nome_completo or not celular or not email or not cargo_desejado:
+            if not all([nome_completo, data_nascimento, celular, email, cargo_desejado]):
                 st.error("Por favor, preencha todos os campos.")
             else:
                 st.session_state["gerar_curriculo.dados_basicos"] = {
@@ -64,8 +65,10 @@ with st.expander("Informações Básicas", expanded=True):
 
 # Aba de Experiência
 @st.dialog("Adicionar/Editar Experiência")
-def adicionar_experiencia(index=None, empresa="", cargo="", admisao=None, demisao=None, descricao=""):
-    with st.form("form_experiencia"):
+def adicionar_experiencia(
+    index=None, empresa="", cargo="", admisao=None, demisao=None, descricao=""
+):
+    with st.form("gerar_curriculo.form_experiencia"):
         empresa_experiencia = st.text_input("Empresa", value=empresa)
         cargo_experiencia = st.text_input("Cargo", value=cargo)
         admisao_experiencia = st.date_input(
@@ -82,17 +85,20 @@ def adicionar_experiencia(index=None, empresa="", cargo="", admisao=None, demisa
             max_value=datetime.date.today(),
             format="DD/MM/YYYY",
         )
+        st.caption("Deixe vazio para emprego atual.")
         descricao_experiencia = st.text_area(
             "Descrição das atividades", value=descricao
         )
         salvar_experiencia = st.form_submit_button("Salvar")
 
         if salvar_experiencia:
-            if (
-                not empresa_experiencia
-                or not cargo_experiencia
-                or not admisao_experiencia
-                or not descricao_experiencia
+            if not all(
+                [
+                    empresa_experiencia,
+                    cargo_experiencia,
+                    admisao_experiencia,
+                    descricao_experiencia,
+                ]
             ):
                 st.error("Por favor, preencha todos os campos.")
             else:
@@ -113,17 +119,20 @@ def adicionar_experiencia(index=None, empresa="", cargo="", admisao=None, demisa
 
 
 with st.expander("Experiência Profissional", expanded=True):
+    st.caption("Deixe vazio para primeiro emprego.")
     if st.button("Adicionar Nova Experiência"):
         adicionar_experiencia()
 
     for idx, exp in enumerate(experiencias):
-        col_info, col_botao = st.columns([.7, .3], vertical_alignment="center")
+        col_info, col_botao = st.columns([0.7, 0.3], vertical_alignment="center")
         with col_info:
             st.write(f"**{exp['Empresa']}** - {exp['Cargo']}")
         with col_botao:
-            col_botao_editar, col_botao_remover = st.columns(2, vertical_alignment="center")
+            col_botao_editar, col_botao_remover = st.columns(
+                2, vertical_alignment="center"
+            )
             with col_botao_editar:
-                if st.button("Editar", key=f"editar_exp_{idx}"):
+                if st.button("Editar", key=f"gerar_curriculo.editar_exp_{idx}"):
                     adicionar_experiencia(
                         index=idx,
                         empresa=exp["Empresa"],
@@ -133,7 +142,7 @@ with st.expander("Experiência Profissional", expanded=True):
                         descricao=exp["Descrição"],
                     )
             with col_botao_remover:
-                if st.button("Remover", key=f"remover_exp_{idx}"):
+                if st.button("Remover", key=f"gerar_curriculo.remover_exp_{idx}"):
                     experiencias.pop(idx)
                     st.rerun()
 
@@ -149,34 +158,39 @@ def adicionar_formacao(
     ano_termino=None,
     situacao="Cursando",
 ):
-    with st.form("form_formacao"):
+    niveis_formacao = ["Educação Básica", "Ensino Profissionalizante", "Ensino Técnico", "Ensino Superior"]
+    situacoes_formacao = ["Cursando", "Concluído", "Trancado", "Incompleto"]
+
+    with st.form("gerar_curriculo.form_formacao"):
         instituicao_formacao = st.text_input("Instituição", value=instituicao)
-        curso_formacao = st.text_input("Curso", value=curso)
+        curso_formacao = st.text_input("Curso", value=curso, help="Ex: Ensino Médio, Ciência da Computação e etc...")
         nivel_formacao = st.selectbox(
             "Nível",
-            ["Educação Básica", "Ensino Tecnico", "Ensino Superior"],
-            index=["Educação Básica", "Ensino Tecnico", "Ensino Superior"].index(
-                nivel
-            )
+            options=niveis_formacao,
+            index=niveis_formacao.index(nivel),
         )
-        ano_inicio_formacao = st.number_input("Ano de início", min_value=1900, step=1, value=ano_inicio)
+        ano_inicio_formacao = st.number_input(
+            "Ano de início", min_value=1900, step=1, value=ano_inicio
+        )
         ano_termino_formacao = st.number_input(
             "Ano de término", min_value=1900, step=1, value=ano_termino
         )
         situacao_formacao = st.selectbox(
             "Situação",
-            ["Cursando", "Concluído", "Trancado"],
-            index=["Cursando", "Concluído", "Trancado"].index(situacao),
+            options=situacoes_formacao,
+            index=situacoes_formacao.index(situacao),
         )
         salvar_formacao = st.form_submit_button("Salvar")
 
         if salvar_formacao:
-            if (
-                not instituicao_formacao
-                or not curso_formacao
-                or not nivel_formacao
-                or not ano_inicio_formacao
-                or not ano_termino_formacao
+            if not all(
+                [
+                    instituicao_formacao,
+                    nivel_formacao,
+                    curso_formacao,
+                    ano_inicio_formacao,
+                    ano_termino_formacao,
+                ]
             ):
                 st.error("Por favor, preencha todos os campos.")
             else:
@@ -197,18 +211,20 @@ def adicionar_formacao(
                 st.rerun()
 
 
-with st.expander("Formação Acadêmica", expanded=True):
+with st.expander("Formação Acadêmica (Obrigatório)", expanded=True):
     if st.button("Adicionar Nova Formação"):
         adicionar_formacao()
 
     for idx, formacao in enumerate(formacoes):
-        col_info, col_botao = st.columns([.7, .3], vertical_alignment="center")
+        col_info, col_botao = st.columns([0.7, 0.3], vertical_alignment="center")
         with col_info:
             st.write(f"**{formacao['Instituição']}** - {formacao['Curso']}")
         with col_botao:
-            col_botao_editar, col_botao_remover = st.columns(2, vertical_alignment="center")
+            col_botao_editar, col_botao_remover = st.columns(
+                2, vertical_alignment="center"
+            )
             with col_botao_editar:
-                if st.button("Editar", key=f"editar_formacao_{idx}"):
+                if st.button("Editar", key=f"gerar_curriculo.editar_formacao_{idx}"):
                     adicionar_formacao(
                         index=idx,
                         instituicao=formacao["Instituição"],
@@ -219,7 +235,7 @@ with st.expander("Formação Acadêmica", expanded=True):
                         situacao=formacao["Situação"],
                     )
             with col_botao_remover:
-                if st.button("Remover", key=f"remover_formacao_{idx}"):
+                if st.button("Remover", key=f"gerar_curriculo.remover_formacao_{idx}"):
                     formacoes.pop(idx)
                     st.rerun()
 
@@ -230,14 +246,14 @@ with st.expander("Habilidades", expanded=True):
         habilidades,
         label="Suas Habilidades",
         text="Adicionar Habilidade",
-        maxtags=5,
+        maxtags=10,
     )
     st.session_state["gerar_curriculo.habilidades"] = habilidades
 
 
-# Função para gerar PDF HTML
-def gerar_pdf():
-    experiencias_html = ""
+# Função para gerar HTML
+def gerar_html() -> str:
+    experiencias_html = "" if experiencias else "<p>Em busca do primeiro emprego</p>"
     for exp in experiencias:
         experiencias_html += f"""
             <ul>
@@ -286,8 +302,23 @@ def gerar_pdf():
         {habilidades_html if habilidades else ''}
     """
 
-    pdf = HTML(string=dados_html).write_pdf()
-    return pdf
+    return dados_html
+
+
+# Função para gerar PDF
+def gerar_pdf() -> None:
+    botao_gerar_pdf.status("Gerando PDF...")
+    botao_baixar_pdf.empty()
+
+    pdf = HTML(string=gerar_html()).write_pdf()
+
+    nome_arquivo = f"{dados_basicos.get('Nome Completo')}.pdf"
+    st.session_state["gerar_curriculo.botao_baixar_pdf"] = lambda: st.download_button(
+        "Baixar Currículo em PDF",
+        data=pdf,
+        file_name=nome_arquivo,
+        mime="application/pdf",
+    )
 
 
 # Progresso de preenchimento
@@ -308,15 +339,28 @@ if habilidades:
     prog = prog.progress(valor_prog, text=texto_prog)
 
 
+# Pré-visualização
+@st.dialog("Pre-Visualização")
+def pre_visualizacao():
+    with st.container(border=True):
+        st.html(gerar_html())
+
+
+botao_pre_visualizacao = st.button(
+    "Pre-Visualizar",
+    on_click=pre_visualizacao,
+    disabled=not (dados_basicos and formacoes),
+)
+
 # Botão para gerar o currículo completo em PDF
-if st.button("Gerar PDF"):
-    if not dados_basicos or not experiencias or not formacoes:
-        st.error("Por favor, preencha todas as informações antes de gerar o PDF.")
-    else:
-        nome_arquivo = f"{dados_basicos.get('Nome Completo')}.pdf"
-        st.download_button(
-            "Baixar Currículo em PDF",
-            data=gerar_pdf(),
-            file_name=nome_arquivo,
-            mime="application/pdf",
-        )
+botao_gerar_pdf = st.empty()
+botao_gerar_pdf.button(
+    "Gerar PDF", on_click=gerar_pdf, disabled=not (dados_basicos and formacoes)
+)
+
+#  Botão para baixar o currículo em PDF
+botao_baixar_pdf = st.empty()
+if _botao_baixar_pdf := st.session_state.get("gerar_curriculo.botao_baixar_pdf"):
+    with botao_baixar_pdf.container():
+        _botao_baixar_pdf()
+        st.session_state.pop("gerar_curriculo.botao_baixar_pdf", None)
