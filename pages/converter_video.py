@@ -20,6 +20,9 @@ def converter_video() -> None:
         return None
 
     try:
+        botao_converter.status("Convertendo o vídeo...")
+        botao_baixar_novo_video.empty()
+
         # Cria um arquivo temporário para salvar o vídeo enviado
         with tempfile.NamedTemporaryFile(
             delete=False, suffix=f".{video.name.rsplit('.', 1)[1]}"
@@ -35,26 +38,28 @@ def converter_video() -> None:
         novo_video_bytes = BytesIO()
 
         # Exporta o vídeo para o novo formato e grava temporariamente
-        with placeholder_load_convertendo_video.container():
-            with st.spinner("Convertendo o vídeo..."):
-                with tempfile.NamedTemporaryFile(
-                    delete=False, suffix=f".{converter_para}"
-                ) as temp_output_file:
-                    video_clip.write_videofile(temp_output_file.name)
-                    video_clip.close()
-                    temp_output_file.seek(0)
-                    novo_video_bytes.write(temp_output_file.read())
+        with tempfile.NamedTemporaryFile(
+            delete=False, suffix=f".{converter_para}"
+        ) as temp_output_file:
+            video_clip.write_videofile(
+                temp_output_file.name,
+                codec="libx264" if converter_para != "webm" else None,
+            )
+            video_clip.close()
+            temp_output_file.seek(0)
+            novo_video_bytes.write(temp_output_file.read())
 
         novo_video_bytes.seek(0)
         novo_formato = f"video/{converter_para}"
 
         # Botão de download para o vídeo convertido
-        placeholder_botao_baixar_novo_video.download_button(
-            f"Baixar vídeo {converter_para}",
-            data=novo_video_bytes.getvalue(),
-            file_name=novo_nome,
-            mime=novo_formato,
-            key="converter_video.botao_baixar_novo_video",
+        st.session_state["converter_video.botao_baixar_novo_video"] = (
+            lambda: st.download_button(
+                f"Baixar vídeo {converter_para}",
+                data=novo_video_bytes.getvalue(),
+                file_name=novo_nome,
+                mime=novo_formato,
+            )
         )
         st.toast(f"Vídeo convertido para {converter_para}.", icon="✅")
 
@@ -89,9 +94,11 @@ if video:
 converter_para = st.selectbox(
     "Converter para", options=opcoes_conversao, disabled=not video
 )
-botao_converter = st.button(
-    "Converter vídeo", on_click=converter_video, disabled=not video
-)
-if st.session_state.get("converter_video.botao_baixar_novo_video") is None:
-    placeholder_botao_baixar_novo_video = st.empty()
-placeholder_load_convertendo_video = st.empty()
+botao_converter = st.empty()
+botao_converter.button("Converter vídeo", on_click=converter_video, disabled=not video)
+botao_baixar_novo_video = st.empty()
+if _botao_baixar_novo_video := st.session_state.get(
+    "converter_video.botao_baixar_novo_video"
+):
+    with botao_baixar_novo_video.container():
+        _botao_baixar_novo_video()

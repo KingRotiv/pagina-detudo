@@ -14,7 +14,7 @@ converter_audio = st.Page("pages/converter_audio.py", title="Converter áudio", 
 # Páginas de vídeo
 converter_video = st.Page("pages/converter_video.py", title="Converter video", icon="🎥")
 
-# Página de curriculo
+# Páginas de currículo
 gerar_curriculo = st.Page("pages/gerar_curriculo.py", title="Gerar Currículo", icon="📄")
 
 pg = st.navigation({

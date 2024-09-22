@@ -18,6 +18,9 @@ def converter_imagem() -> None:
         )
         return None
     try:
+        botao_converter.status("Convertendo imagem...")
+        botao_baixar_nova_imagem.empty()
+
         with Image.open(imagem) as i:
             # Se a imagem tiver um canal alfa, converta para RGB antes de salvar em JPEG
             if converter_para == "jpeg" and i.mode == "RGBA":
@@ -29,12 +32,13 @@ def converter_imagem() -> None:
 
             novo_nome = f"{imagem.name.rsplit('.', 1)[0]}.{converter_para}"
             novo_formato = f"image/{converter_para}"
-            placeholder_botao_baixar_nova_imagem.download_button(
-                f"Baixar imagem {converter_para}",
-                data=nova_imagem_bytes.getvalue(),
-                file_name=novo_nome,
-                mime=novo_formato,
-                key="converter_imagem.botao_baixar_nova_imagem",
+            st.session_state["converter_imagem.botao_baixar_nova_imagem"] = (
+                lambda: st.download_button(
+                    f"Baixar imagem {converter_para}",
+                    data=nova_imagem_bytes.getvalue(),
+                    file_name=novo_nome,
+                    mime=novo_formato,
+                )
             )
             st.toast(f"Imagem convertida para {converter_para}.", icon="✅")
     except Exception as ex:
@@ -54,8 +58,13 @@ if imagem:
 converter_para = st.selectbox(
     "Converter para", options=opcoes_conversao, disabled=not imagem
 )
-botao_converter = st.button(
+botao_converter = st.empty()
+botao_converter.button(
     "Converter imagem", on_click=converter_imagem, disabled=not imagem
 )
-if st.session_state.get("converter_imagem.botao_baixar_nova_imagem") is None:
-    placeholder_botao_baixar_nova_imagem = st.empty()
+botao_baixar_nova_imagem = st.empty()
+if _botao_baixar_nova_imagem := st.session_state.get(
+    "converter_imagem.botao_baixar_nova_imagem"
+):
+    with botao_baixar_nova_imagem.container():
+        _botao_baixar_nova_imagem()
