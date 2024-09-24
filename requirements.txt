@@ -1,7 +1,9 @@
 exifread==3.0.0
 loguru==0.7.2
 moviepy==1.0.3
+pydantic==2.9.2
 pydub==0.25.1
+requests==2.32.3
 streamlit==1.38.0
 streamlit-tags==1.2.8
 weasyprint==62.3
