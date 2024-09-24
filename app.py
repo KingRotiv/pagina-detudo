@@ -17,6 +17,12 @@ converter_video = st.Page("pages/converter_video.py", title="Converter video", i
 # Páginas de currículo
 gerar_curriculo = st.Page("pages/gerar_curriculo.py", title="Gerar Currículo", icon="📄")
 
+# Páginas de localização
+ip_geolocazacao = st.Page("pages/ip_geolocalizacao.py", title="IP Geolocalização", icon="🌎")
+
+# Página de apostas
+loterias = st.Page("pages/loterias_caixa.py", title="Loterias Caixa", icon="🍀")
+
 pg = st.navigation({
     "Menu": [inicio],
     "Imagem": [
@@ -26,5 +32,7 @@ pg = st.navigation({
     "Áudio": [converter_audio],
     "Vídeo": [converter_video],
     "Currículo": [gerar_curriculo],
+    "Localização": [ip_geolocazacao],
+    "Apostas": [loterias]
 })
 pg.run()
