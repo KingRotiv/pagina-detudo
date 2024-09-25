@@ -23,6 +23,9 @@ ip_geolocazacao = st.Page("pages/ip_geolocalizacao.py", title="IP Geolocalizaç�
 # Página de apostas
 loterias = st.Page("pages/loterias_caixa.py", title="Loterias Caixa", icon="🍀")
 
+# Página de jogos
+jogo_das_palavras = st.Page("pages/jogo_das_palavras.py", title="Jogo das Palavras", icon="🎮")
+
 pg = st.navigation({
     "Menu": [inicio],
     "Imagem": [
@@ -33,6 +36,7 @@ pg = st.navigation({
     "Vídeo": [converter_video],
     "Currículo": [gerar_curriculo],
     "Localização": [ip_geolocazacao],
-    "Apostas": [loterias]
+    "Apostas": [loterias],
+    "Jogos": [jogo_das_palavras],
 })
 pg.run()
