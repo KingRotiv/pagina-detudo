@@ -259,7 +259,7 @@ st.title("Jogo das palavras")
 
 # Main
 if "palavra_escolhida" not in st.session_state:
-    iniciar()
+    st.button("Iniciar", on_click=iniciar)
 else:
     st.button("Reiniciar", on_click=iniciar)
 
